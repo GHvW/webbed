@@ -18,22 +18,23 @@
            {}))
     edges))
 
-(defn bfs [adjacency-list queue visited paths]
+(defn bfs [adjacency-list paths visited queue]
   (if (empty? queue)
     paths
-    (let [state (->> (adjacency-list (peek queue))
-                     (filter (fn [connection] (nil? (visited connection))))
-                     (reduce
-                       (fn [state connection]
-                         (let [{_paths :paths _visited :visited _queue :queue} state]
-                           {:paths (conj _paths {connection (peek queue)})
-                            :visited (conj _visited connection)
-                            :queue (conj _queue connection)}))
-                       {:paths paths :visited visited :queue queue}))]
-      (recur adjacency-list (pop (state :queue)) (state :visited) (state :paths)))))
+    (let [{p :paths v :visited q :queue}
+          (->> (adjacency-list (peek queue))
+               (filter (fn [connection] (nil? (visited connection))))
+               (reduce
+                 (fn [state connection]
+                   (let [{_paths :paths _visited :visited _queue :queue} state]
+                     {:paths (conj _paths {connection (peek queue)})
+                      :visited (conj _visited connection)
+                      :queue (conj _queue connection)}))
+                 {:paths paths :visited visited :queue queue}))]
+      (recur adjacency-list p v (pop q)))))
 
 (defn shortest-paths [start adjacency-list]
-  (bfs adjacency-list (conj PersistentQueue/EMPTY start) #{start} {start nil}))
+  (bfs adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
 (def graph
   {:vertices #{:a :b :c :d}
