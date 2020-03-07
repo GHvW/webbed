@@ -1,4 +1,5 @@
-(ns webbed.graph)
+(ns webbed.graph
+  (:import (clojure.lang PersistentQueue)))
 
 ; graph is { :vertices #{vertices}, :edges #{edges} }
 (defn update-edges [adjacency-list from to]
@@ -17,7 +18,12 @@
            {}))
     edges))
 
+(defn bfs [from to adjacency-list queue visited path]
+  (let [next (peek queue)]
+   (if (empty? queue))))
 
+(defn shortest-path [from to adjacency-list]
+  (bfs from to adjacency-list (conj PersistentQueue/EMPTY from) #{from} ()))
 
 (def graph
   {:vertices #{:a :b :c :d}
