@@ -18,12 +18,22 @@
            {}))
     edges))
 
-(defn bfs [from to adjacency-list queue visited path]
-  (let [next (peek queue)]
-   (if (empty? queue))))
+(defn bfs [adjacency-list queue visited paths]
+  (if (empty? queue)
+    paths
+    (let [state (->> (adjacency-list (peek queue))
+                     (filter (fn [connection] (nil? (visited connection))))
+                     (reduce
+                       (fn [state connection]
+                         (let [{_paths :paths _visited :visited _queue :queue} state]
+                           {:paths (conj _paths {connection (peek queue)})
+                            :visited (conj _visited connection)
+                            :queue (conj _queue connection)}))
+                       {:paths paths :visited visited :queue queue}))]
+      (recur adjacency-list (pop (state :queue)) (state :visited) (state :paths)))))
 
-(defn shortest-path [from to adjacency-list]
-  (bfs from to adjacency-list (conj PersistentQueue/EMPTY from) #{from} ()))
+(defn shortest-paths [start adjacency-list]
+  (bfs adjacency-list (conj PersistentQueue/EMPTY start) #{start} {start nil}))
 
 (def graph
   {:vertices #{:a :b :c :d}
@@ -38,3 +48,13 @@
 
 (def testmake (make->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
+
+(def test3 (->> (adjlist :a)
+                (filter (fn [connection] (nil? (#{:a} connection))))
+                (reduce
+                  (fn [state connection]
+                    (let [{_paths :paths _visited :visited _queue :queue} state]
+                      {:paths (conj _paths {connection :a})
+                       :visited (conj _visited connection)
+                       :queue (conj _queue connection)}))
+                  {:paths {} :visited #{:a} :queue (conj PersistentQueue/EMPTY :a)})))
