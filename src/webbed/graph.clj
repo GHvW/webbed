@@ -11,11 +11,11 @@
     (fn [adj edge]
       (let [{from :from to :to} edge]
         (update-edges (update-edges adj from to) to from)))
-    (->> vertices
-         (reduce
-           (fn [adj vertex]
-             (conj adj { vertex #{} }))
-           {}))
+    (reduce
+      (fn [adj vertex]
+        (conj adj { vertex #{} }))
+      {}
+      vertices)
     edges))
 
 (defn bfs [adjacency-list paths visited queue]
@@ -35,6 +35,8 @@
 
 (defn shortest-paths [start adjacency-list]
   (bfs adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+
+; --------------- Testing stuff ----------------
 
 (def graph
   {:vertices #{:a :b :c :d}
