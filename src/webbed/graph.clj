@@ -18,6 +18,9 @@
       vertices)
     edges))
 
+(defn degree [adjacency-list vertex]
+  (count (adjacency-list vertex)))
+
 (defn bfs [adjacency-list paths visited queue]
   (if (empty? queue)
     paths
@@ -35,6 +38,14 @@
 
 (defn shortest-paths [start adjacency-list]
   (bfs adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+
+(defn build-path [to shortest-paths path]
+  (if (nil? to)
+    path
+    (recur (shortest-paths to) shortest-paths (cons to path))))
+
+(defn degrees-of-separation [shortest-paths to]
+  (build-path to shortest-paths ()))
 
 ; --------------- Testing stuff ----------------
 
