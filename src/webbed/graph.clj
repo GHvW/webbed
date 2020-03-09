@@ -56,17 +56,17 @@
 (defn traverse [adjacency-list path visited memory]
   (if (empty? memory)
     path
-    (let [connections (->> memory
+    (let [connections (-> memory
                            (peek)
                            (adjacency-list)
-                           (filter (fn [connection] (nil? (visited connection)))))]
+                           (set/difference visited))]
       (recur adjacency-list
-             (cons path (adjacency-list (peek memory)))
+             (cons (peek memory) path)
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
 
 (defn depth-first-traverse [adjacency-list start]
-  (traverse adjacency-list (list start) #{start} (list start)))
+  (traverse adjacency-list () #{start} (list start)))
 ; --------------- Testing stuff ----------------
 
 (def graph
