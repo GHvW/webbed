@@ -23,22 +23,6 @@
 (defn degree [adjacency-list vertex]
   (count (adjacency-list vertex)))
 
-(defn bfs [adjacency-list paths visited queue]
-  "Breadth first search helper for shortest-paths"
-  (if (empty? queue)
-    paths
-    (let [{p :paths v :visited q :queue}
-          (->> (adjacency-list (peek queue))
-               (filter (fn [connection] (nil? (visited connection))))
-               (reduce
-                 (fn [state connection]
-                   (let [{_paths :paths _visited :visited _queue :queue} state]
-                     {:paths (conj _paths {connection (peek queue)})
-                      :visited (conj _visited connection)
-                      :queue (conj _queue connection)}))
-                 {:paths paths :visited visited :queue queue}))]
-      (recur adjacency-list p v (pop q)))))
-
 (defn bf-paths [adjacency-list paths visited queue]
   "Breadth first search helper for shortest-paths"
   (if (empty? queue)
