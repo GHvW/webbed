@@ -7,7 +7,7 @@
   "Adds edges to a vertex in an adjacency list"
   (update adjacency-list from conj to))
 
-(defn graph->adj-list [vertices edges]
+(defn undirected-graph->adj-list [vertices edges]
   "Takes a set of vertices and a set of edges and constructs an adjacency list from them"
   (reduce
     (fn [adj edge]
@@ -19,6 +19,18 @@
       {}
       vertices)
     edges))
+
+(defn directed-graph->adj-list [vertices edges]
+  (reduce
+    (fn [adj edge]
+      (let [{from :from to :to} edge]
+        (update-edges adj from to)))
+    (reduce
+      (fn [adj vertex]
+        (conj adj { vertex #{} }))
+      {}
+      vertices)
+  edges))
 
 (defn degree [adjacency-list vertex]
   (count (adjacency-list vertex)))
@@ -93,6 +105,7 @@
    :7 #{:3}
    :8 #{:5 :4}})
 
-(def testmake (graph->adj-list (graph :vertices) (graph :edges)))
+(def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
+(def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
 
