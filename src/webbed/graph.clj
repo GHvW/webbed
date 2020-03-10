@@ -39,9 +39,23 @@
                  {:paths paths :visited visited :queue queue}))]
       (recur adjacency-list p v (pop q)))))
 
+(defn bf-paths [adjacency-list paths visited queue]
+  "Breadth first search helper for shortest-paths"
+  (if (empty? queue)
+    paths
+    (let [next-vertex (peek queue)
+          connections (-> queue
+                          (peek)
+                          (adjacency-list)
+                          (set/difference visited))]
+      (recur adjacency-list
+             (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
+             (set/union connections visited)
+             (apply conj (pop queue) connections)))))
+
 (defn shortest-paths [start adjacency-list]
   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
-  (bfs adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+  (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
 (defn build-path [to shortest-paths path]
   "Builds the path as a sequence to the 'to' vertex"
