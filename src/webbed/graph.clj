@@ -61,12 +61,12 @@
                            (adjacency-list)
                            (set/difference visited))]
       (recur adjacency-list
-             (cons (peek memory) path)
+             (conj path (peek memory))
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
 
 (defn depth-first-traverse [adjacency-list start]
-  (traverse adjacency-list () #{start} (list start)))
+  (traverse adjacency-list [] #{start} (list start)))
 ; --------------- Testing stuff ----------------
 
 (def graph
@@ -81,6 +81,16 @@
    :c #{:a :d}
    :d #{:a :c}
    :e #{:b}})
+
+(def adjlist2
+  {:1 #{:3 :4}
+   :2 #{}
+   :3 #{:1 :5 :7}
+   :4 #{:1 :8}
+   :5 #{:3 :8 :6}
+   :6 #{:5}
+   :7 #{:3}
+   :8 #{:5 :4}})
 
 (def testmake (graph->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
