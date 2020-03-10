@@ -67,6 +67,9 @@
 
 (defn depth-first-traverse [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
+
+(defn breadth-first-traverse [adjacency-list start]
+  traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start))
 ; --------------- Testing stuff ----------------
 
 (def graph
