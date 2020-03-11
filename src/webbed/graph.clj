@@ -67,13 +67,16 @@
   (if (empty? memory)
     path
     (let [connections (-> memory
-                           (peek)
-                           (adjacency-list)
-                           (set/difference visited))]
+                          (peek)
+                          (adjacency-list)
+                          (set/difference visited))]
       (recur adjacency-list
              (conj path (peek memory))
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
+
+(defn seq-traverse [adjacency-list visited memory] ; we'll see ...
+  (if ()))
 
 (defn depth-first-traverse [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
