@@ -76,7 +76,14 @@
              (apply conj (pop memory) connections)))))
 
 (defn seq-traverse [adjacency-list visited memory] ; we'll see ...
-  (if ()))
+  (lazy-seq
+    (when-let [next (peek memory)]
+      (let [connections (-> next
+                            (adjacency-list)
+                            (set/difference visited))]
+        (cons next (seq-traverse adjacency-list
+                                 (set/union connections visited)
+                                 (apply conj (pop memory) connections)))))))
 
 (defn depth-first-traverse [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
