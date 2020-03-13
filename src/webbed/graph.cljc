@@ -100,8 +100,16 @@
 
 ; ----------------- Weighted Tests --------------------
 
-(defn weighted->adj-list [vertices edges]
-  ())
+(defn weighted-directed-graph->adj-list [{:keys [vertices edges]}]
+  (->> edges
+       (reduce
+         (fn [adj edge]
+           (update-edges adj (vertices (edge :from)) edge))
+         (->> vertices
+              (reduce
+                (fn [adj vertex]
+                  (conj adj {vertex #{}}))
+                {})))))
 
 ; --------------- Testing stuff ----------------
 
@@ -161,4 +169,3 @@
 (def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
 (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
-
