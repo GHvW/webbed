@@ -75,21 +75,34 @@
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
 
-(defn seq-traverse [adjacency-list visited memory] ; we'll see ...
+(defn lazy-traverse [adjacency-list visited memory] ; we'll see ...
   (lazy-seq
     (when-let [next (peek memory)]
       (let [connections (-> next
                             (adjacency-list)
                             (set/difference visited))]
-        (cons next (seq-traverse adjacency-list
+        (cons next (lazy-traverse adjacency-list
                                  (set/union connections visited)
                                  (apply conj (pop memory) connections)))))))
 
-(defn depth-first-traverse [adjacency-list start]
+(defn depth-first-order [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
 
-(defn breadth-first-traverse [adjacency-list start]
+(defn breadth-first-order [adjacency-list start]
   traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start))
+
+(defn df-seq [start adjacency-list]
+  (lazy-traverse adjacency-list #{start} (list start)))
+
+(defn bf-seq [start adjacency-list]
+  (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
+
+
+; ----------------- Weighted Tests --------------------
+
+(defn weighted->adj-list [vertices edges]
+  ())
+
 ; --------------- Testing stuff ----------------
 
 (def graph
@@ -97,6 +110,36 @@
    :edges #{{:from :a :to :c}
             {:from :d :to :c}
             {:from :c :to :b}}})
+
+(def weighted-graph
+  {:vertices #{:a :b :c :d :h :i :j}
+   :edges #{{:from :a
+             :to :b
+             :weight 4}
+            {:from :d
+             :to :c
+             :weight 3}
+            {:from :c
+             :to :b
+             :weight 1}
+            {:from :b
+             :to :i
+             :weight 7}
+            {:from :j
+             :to :d
+             :weight 2}
+            {:from :h
+             :to :c
+             :weight 3}
+            {:from :i
+             :to :d
+             :weight 19}
+            {:from :b
+             :to :a
+             :weight 3}
+            {:from :d
+             :to :i
+             :weight 15}}})
 
 (def adjlist
   {:a #{:b :c :d}
