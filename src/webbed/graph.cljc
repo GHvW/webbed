@@ -116,7 +116,23 @@
        (reduce
          (fn [adj edge]
            (update-edges adj (vertices (edge :from)) edge))
-         (into (hash-map) (map (fn [vertex] {vertex #{}}) vertices)))))
+         (->> vertices
+              (map (fn [vertex] {vertex #{}}))
+              (into (hash-map))))))
+
+(defn switch-direction [{:keys [from to weight]}]
+  {:from to :to from :weight weight})
+
+(defn weighted-undirected-graph->adj-list [{:keys [vertices edges]}]
+  (->> edges
+       (reduce
+         (fn [adj edge]
+           (update-edges
+             (update-edges adj (vertices (edge :to)) (switch-direction edge))
+             (vertices (edge :from)) edge))
+         (->> vertices
+              (map (fn [vertex] {vertex #{}}))
+              (into (hash-map))))))
 
 ; --------------- Testing stuff ----------------
 
