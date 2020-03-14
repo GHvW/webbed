@@ -75,7 +75,7 @@
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
 
-(defn lazy-traverse [adjacency-list visited memory] ; we'll see ...
+(defn lazy-traverse [adjacency-list visited memory]
   (lazy-seq
     (when-let [next (peek memory)]
       (let [connections (-> next
@@ -100,16 +100,23 @@
 
 ; ----------------- Weighted Tests --------------------
 
+;(defn weighted-directed-graph->adj-list [{:keys [vertices edges]}]
+;  (->> edges
+;       (reduce
+;         (fn [adj edge]
+;           (update-edges adj (vertices (edge :from)) edge))
+;         (->> vertices
+;              (reduce
+;                (fn [adj vertex]
+;                  (conj adj {vertex #{}}))
+;                {})))))
+
 (defn weighted-directed-graph->adj-list [{:keys [vertices edges]}]
   (->> edges
        (reduce
          (fn [adj edge]
            (update-edges adj (vertices (edge :from)) edge))
-         (->> vertices
-              (reduce
-                (fn [adj vertex]
-                  (conj adj {vertex #{}}))
-                {})))))
+         (into (hash-map) (map (fn [vertex] {vertex #{}}) vertices)))))
 
 ; --------------- Testing stuff ----------------
 
