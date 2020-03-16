@@ -1,5 +1,6 @@
 (ns webbed.graph
-  (:require [clojure.set :as set])
+  (:require [clojure.set :as set]
+            [clojure.data.priority-map :refer [priority-map]])
   (:import (clojure.lang PersistentQueue)))
 
 ; graph is { :vertices #{vertices}, :edges #{edges} }
@@ -112,27 +113,33 @@
 ;                {})))))
 
 (defn weighted-directed-graph->adj-list [{:keys [vertices edges]}]
-  (->> edges
-       (reduce
-         (fn [adj edge]
-           (update-edges adj (vertices (edge :from)) edge))
-         (->> vertices
-              (map (fn [vertex] {vertex #{}}))
-              (into (hash-map))))))
+  (reduce
+    (fn [adj edge]
+      (update-edges adj (vertices (edge :from)) edge))
+    (->> vertices
+         (map (fn [vertex] {vertex #{}}))
+         (into (hash-map)))
+    edges))
 
 (defn switch-direction [{:keys [from to weight]}]
   {:from to :to from :weight weight})
 
 (defn weighted-undirected-graph->adj-list [{:keys [vertices edges]}]
-  (->> edges
-       (reduce
-         (fn [adj edge]
-           (update-edges
-             (update-edges adj (vertices (edge :to)) (switch-direction edge))
-             (vertices (edge :from)) edge))
-         (->> vertices
-              (map (fn [vertex] {vertex #{}}))
-              (into (hash-map))))))
+  (reduce
+    (fn [adj edge]
+      (update-edges
+        (update-edges adj (vertices (edge :to)) (switch-direction edge))
+        (vertices (edge :from)) edge))
+    (->> vertices
+         (map (fn [vertex] {vertex #{}}))
+         (into (hash-map)))
+    edges))
+
+(defn dijkstra [edge-to dist-to pq adj-list]
+  ())
+
+(defn directed-shortest-path [adj-list start]
+  (dijkstra [] [] (priority-map start 0) adj-list))
 
 ; --------------- Testing stuff ----------------
 
