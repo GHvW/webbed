@@ -54,11 +54,11 @@
   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
   (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
-(defn build-path [to shortest-paths path]
+(defn build-path [to paths path]
   "Builds the path as a sequence to the 'to' vertex"
   (if (nil? to)
     path
-    (recur (shortest-paths to) shortest-paths (cons to path))))
+    (recur (paths to) paths (cons to path))))
 
 (defn degrees-of-separation [shortest-paths to]
   "Gets the path to the 'to' vertex"
@@ -135,11 +135,23 @@
          (into (hash-map)))
     edges))
 
+(defn relax [edge-to dist-to pq edge]
+  (let [{:keys [from to weight]} edge]
+    (if (or
+          (nil? (dist-to to))
+          (> (dist-to to) (+ (dist-to from) weight)))
+      (let [_dist-to (assoc dist-to to (+ (dist-to from) weight))
+            _edge-to (assoc edge-to to edge)]
+        [(assoc pq to ())]))))
+
 (defn dijkstra [edge-to dist-to pq adj-list]
-  ())
+  (if-let [next (peek pq)]
+    (let [to (next :to)]
+      (if (or ( edge-to to))))
+    {:edge-to edge-to :dist-to dist-to}))
 
 (defn directed-shortest-path [adj-list start]
-  (dijkstra [] [] (priority-map start 0) adj-list))
+  (dijkstra {start nil} {start 0} (priority-map start 0) adj-list))
 
 ; --------------- Testing stuff ----------------
 
@@ -178,6 +190,18 @@
             {:from :d
              :to :i
              :weight 15}}})
+
+(def dij-test
+  {:s #{{:from :s :to :e :weight 2}
+        {:from :s :to :a :weight 4}}
+   :a #{{:from :a :to :d :weight 3}
+        {:from :a :to :b :weight 5}
+        {:from :a :to :c :weight 6}}
+   :b #{{:from :b :to :a :weight 5}}
+   :c #{{:from :c :to :b :weight 1}}
+   :d #{{:from :d :to :a :weight 1}
+        {:from :d :to :c :weight 3}}
+   :e #{{:from :e :to :d :weight 1}}})
 
 (def adjlist
   {:a #{:b :c :d}
