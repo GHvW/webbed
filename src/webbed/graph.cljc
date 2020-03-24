@@ -135,19 +135,28 @@
          (into (hash-map)))
     edges))
 
-(defn relax [edge-to dist-to pq edge]
+(defn relax [[edge-to dist-to pq] edge]
   (let [{:keys [from to weight]} edge]
+    ;(println dist-to)
+    ;(println edge-to)
+    ;(println (str "from " from))
+    ;(println (str "to " to))
+    ;(println (str "weight " weight))
     (if (or
           (nil? (dist-to to))
           (> (dist-to to) (+ (dist-to from) weight)))
       (let [_dist-to (assoc dist-to to (+ (dist-to from) weight))
             _edge-to (assoc edge-to to edge)]
-        [(assoc pq to ())]))))
+        [_edge-to _dist-to (assoc pq to (_dist-to to))])
+      [edge-to dist-to pq])))
 
 (defn dijkstra [edge-to dist-to pq adj-list]
-  (if-let [next (peek pq)]
-    (let [to (next :to)]
-      (if (or ( edge-to to))))
+  (if-let [[next-vertex _] (peek pq)]
+    (let [[e d p] (reduce
+                    relax
+                    [edge-to dist-to (pop pq)]
+                    (adj-list next-vertex))]
+      (recur e d p adj-list))
     {:edge-to edge-to :dist-to dist-to}))
 
 (defn directed-shortest-path [adj-list start]
