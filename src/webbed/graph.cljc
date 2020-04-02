@@ -16,7 +16,7 @@
         (update-edges (update-edges adj from to) to from)))
     (reduce
       (fn [adj vertex]
-        (conj adj { vertex #{} }))
+        (conj adj { vertex #{}}))
       {}
       vertices)
     edges))
@@ -28,10 +28,10 @@
         (update-edges adj from to)))
     (reduce
       (fn [adj vertex]
-        (conj adj { vertex #{} }))
+        (conj adj { vertex #{}}))
       {}
       vertices)
-  edges))
+   edges))
 
 (defn degree [adjacency-list vertex]
   (count (adjacency-list vertex)))
@@ -60,9 +60,10 @@
     path
     (recur (paths to) paths (cons to path))))
 
-(defn degrees-of-separation [shortest-paths to]
+
+(defn degrees-of-separation [paths to]
   "Gets the path to the 'to' vertex"
-  (build-path to shortest-paths ()))
+  (build-path to paths ()))
 
 (defn traverse [adjacency-list path visited memory]
   (if (empty? memory)
@@ -162,6 +163,11 @@
 (defn directed-shortest-path [adj-list start]
   (dijkstra {start nil} {start 0} (priority-map start 0) adj-list))
 
+(defn build-shortest-path [to paths path]
+  (if-let [next-edge (paths to)]
+    (recur (next-edge :from) paths (cons to path))
+    path))
+
 ; --------------- Testing stuff ----------------
 
 (def graph
@@ -232,3 +238,8 @@
 (def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
 (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
+
+(build-shortest-path :b ((directed-shortest-path dij-test :s) :edge-to) ())
+
+; (degrees-of-separation ((directed-shortest-path dij-test :s) :edge-to) :b)
+((directed-shortest-path dij-test :s) :edge-to)
