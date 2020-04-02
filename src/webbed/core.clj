@@ -1,5 +1,6 @@
 (ns webbed.core
-  (:require [webbed.graph :refer :all]))
+  (:require [webbed.graph :refer :all]
+            [webbed.weighted-graph :refer :all]))
 
 (defn -main
   "I don't do a whole lot."
