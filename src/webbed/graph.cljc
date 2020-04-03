@@ -34,7 +34,20 @@
    edges))
 
 (defn degree [adjacency-list vertex]
+  "The number of connections to the vertex"
   (count (adjacency-list vertex)))
+
+(defn max-degree [adjacency-list]
+  "Find the vertex with the most connections"
+  (reduce-kv
+   (fn [max k v]
+     (if (> (degree adjacency-list k) max)
+       (degree adjacency-list k)
+       max))
+   0
+   adjacency-list))
+
+
 
 (defn bf-paths [adjacency-list paths visited queue]
   "Breadth first search helper for shortest-paths"
@@ -132,6 +145,7 @@
 
 
 
+(def maxdeg (max-degree adjlist2))
 (defn adder [x y] (+ x y))
 
 (adder 10 20)
