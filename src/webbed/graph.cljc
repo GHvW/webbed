@@ -38,16 +38,25 @@
   (count (adjacency-list vertex)))
 
 (defn max-degree [adjacency-list]
-  "Find the vertex with the most connections"
+  "Find max connections of all nodes"
   (reduce-kv
-   (fn [max k v]
+   (fn [max k _]
      (if (> (degree adjacency-list k) max)
        (degree adjacency-list k)
        max))
    0
    adjacency-list))
 
-
+(defn max-degree-with-key [adjacency-list]
+  "Find the vertex with the most connections of all nodes"
+  (reduce-kv
+    (fn [max k _]
+      (let [vertex-degree (degree adjacency-list k)]
+        (if (> vertex-degree (max :degree))
+          {:vertex k :degree vertex-degree}
+          max)))
+    {:vertex nil :degree 0}
+    adjacency-list))
 
 (defn bf-paths [adjacency-list paths visited queue]
   "Breadth first search helper for shortest-paths"
@@ -146,6 +155,7 @@
 
 
 (def maxdeg (max-degree adjlist2))
+(def maxwkey (max-degree-with-key adjlist2))
 (defn adder [x y] (+ x y))
 
 (adder 10 20)
