@@ -37,6 +37,12 @@
   "The number of connections to the vertex"
   (count (adjacency-list vertex)))
 
+(defn average-degree [adjacency-list]
+  "Find the average degree of the nodes in the graph"
+  (as-> adjacency-list x
+       (reduce-kv (fn [total k v] (+ total (count v))) 0 x)
+       (/ x (count adjacency-list))))
+
 (defn max-degree [adjacency-list]
   "Find max connections of all nodes"
   (reduce-kv
@@ -152,6 +158,7 @@
 (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
 (def test2 (update-edges adjlist :e :c))
 
+(average-degree adjlist2)
 
 
 (def maxdeg (max-degree adjlist2))
