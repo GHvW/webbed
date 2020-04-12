@@ -1,25 +1,26 @@
 (ns webbed.graph
-  (:require [clojure.set :as set]
-            [clojure.data.priority-map :refer [priority-map]])
+  (:require [clojure.set :as set])
   (:import (clojure.lang PersistentQueue)))
 
 ; graph is { :vertices #{vertices}, :edges #{edges} }
-(defn update-edges [adjacency-list from to]
+(defn update-edges 
   "Adds edges to a vertex in an adjacency list"
+  [adjacency-list from to]
   (update adjacency-list from conj to))
 
-(defn undirected-graph->adj-list [vertices edges]
+(defn undirected-graph->adj-list 
   "Takes a set of vertices and a set of edges and constructs an adjacency list from them"
+  [vertices edges]
   (reduce
-    (fn [adj edge]
-      (let [{from :from to :to} edge]
-        (update-edges (update-edges adj from to) to from)))
-    (reduce
-      (fn [adj vertex]
-        (conj adj { vertex #{}}))
-      {}
-      vertices)
-    edges))
+   (fn [adj edge]
+     (let [{from :from to :to} edge]
+       (update-edges (update-edges adj from to) to from)))
+   (reduce
+    (fn [adj vertex]
+      (conj adj { vertex #{}}))
+    {}
+    vertices)
+   edges))
 
 (defn directed-graph->adj-list [vertices edges]
   (reduce
@@ -33,12 +34,14 @@
       vertices)
    edges))
 
-(defn degree [adjacency-list vertex]
+(defn degree 
   "The number of connections to the vertex"
+  [adjacency-list vertex]
   (count (adjacency-list vertex)))
 
-(defn max-degree [adjacency-list]
+(defn max-degree 
   "Find max connections of all nodes"
+  [adjacency-list]
   (reduce-kv
    (fn [max k _]
      (if (> (degree adjacency-list k) max)
@@ -47,19 +50,21 @@
    0
    adjacency-list))
 
-(defn max-degree-with-key [adjacency-list]
+(defn max-degree-with-key 
   "Find the vertex with the most connections of all nodes"
+  [adjacency-list]
   (reduce-kv
-    (fn [max k _]
-      (let [vertex-degree (degree adjacency-list k)]
-        (if (> vertex-degree (max :degree))
-          {:vertex k :degree vertex-degree}
-          max)))
-    {:vertex nil :degree 0}
-    adjacency-list))
+   (fn [max k _]
+     (let [vertex-degree (degree adjacency-list k)]
+       (if (> vertex-degree (max :degree))
+         {:vertex k :degree vertex-degree}
+         max)))
+   {:vertex nil :degree 0}
+   adjacency-list))
 
-(defn bf-paths [adjacency-list paths visited queue]
+(defn bf-paths 
   "Breadth first search helper for shortest-paths"
+  [adjacency-list paths visited queue]
   (if (empty? queue)
     paths
     (let [next-vertex (peek queue)
@@ -72,19 +77,22 @@
              (set/union connections visited)
              (apply conj (pop queue) connections)))))
 
-(defn shortest-paths [start adjacency-list]
+(defn shortest-paths 
   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
+  [start adjacency-list]
   (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
-(defn build-path [to paths path]
+(defn build-path 
   "Builds the path as a sequence to the 'to' vertex"
+  [to paths path]
   (if (nil? to)
     path
     (recur (paths to) paths (cons to path))))
 
 
-(defn degrees-of-separation [paths to]
+(defn degrees-of-separation 
   "Gets the path to the 'to' vertex"
+  [paths to]
   (build-path to paths ()))
 
 (defn traverse [adjacency-list path visited memory]
