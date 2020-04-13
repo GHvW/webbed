@@ -69,7 +69,7 @@
    {:vertex nil :degree 0}
    adjacency-list))
 
-(defn bf-paths 
+(defn bf-paths ; going trhough connections 3 times. change it?
   "Breadth first search helper for shortest-paths"
   [adjacency-list paths visited queue]
   (if (empty? queue)
@@ -84,10 +84,35 @@
              (set/union connections visited)
              (apply conj (pop queue) connections)))))
 
+(defn bf-paths-edges ;change this
+  "Breadth first search helper for shortest-paths"
+  [adjacency-list paths visited queue]
+  (if (empty? queue)
+    paths
+    (let [next-vertex (peek queue)
+          connections (set/difference 
+                       (->> queue
+                            (peek)
+                            (adjacency-list)
+                            (map (fn [edge] (edge :to)))
+                            (set))
+                       visited)]
+      (recur adjacency-list
+             (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
+             (set/union connections visited)
+             (apply conj (pop queue) connections)))))
+
+
+
 (defn shortest-paths 
   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
   [start adjacency-list]
   (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+
+(defn shortest-paths-edges ;change this
+  "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
+  [start adjacency-list]
+  (bf-paths-edges adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
 (defn build-path 
   "Builds the path as a sequence to the 'to' vertex"
@@ -162,6 +187,18 @@
    :6 #{:5}
    :7 #{:3}
    :8 #{:5 :4}})
+
+(def dij-test
+  {:s #{{:from :s :to :e :weight 2}
+        {:from :s :to :a :weight 4}}
+   :a #{{:from :a :to :d :weight 3}
+        {:from :a :to :b :weight 5}
+        {:from :a :to :c :weight 6}}
+   :b #{{:from :b :to :a :weight 5}}
+   :c #{{:from :c :to :b :weight 1}}
+   :d #{{:from :d :to :a :weight 1}
+        {:from :d :to :c :weight 3}}
+   :e #{{:from :e :to :d :weight 1}}})
 
 (def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
 (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
