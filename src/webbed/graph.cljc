@@ -84,9 +84,8 @@
              (set/union connections visited)
              (apply conj (pop queue) connections)))))
 
-(defn bf-paths-edges ;change this
-  "Breadth first search helper for shortest-paths"
-  [adjacency-list paths visited queue]
+(defn bf-paths-edges ;change this ; goes through connections multiple times, change
+  "Breadth first search helper for shortest-paths" [adjacency-list paths visited queue]
   (if (empty? queue)
     paths
     (let [next-vertex (peek queue)
@@ -102,6 +101,25 @@
              (set/union connections visited)
              (apply conj (pop queue) connections)))))
 
+(defn bf-paths-proto
+  "Breadth first search helper for shortest-paths"
+  [adjacency-list paths visited queue]
+  (if (empty? queue)
+    paths
+    (let [vertex (peek queue)
+          [paths' visited' queue'] (->> vertex
+                                        (adjacency-list)
+                                        (map (fn [edge] (edge :to))) ;abstract the "getting edges?"
+                                        (reduce  ; move the reducer to its own fn?
+                                         (fn [[p v q] connection]
+                                           (if (contains? visited connection)
+                                             [p v q]
+                                             [(conj p {connection vertex}) 
+                                              (conj v connection) 
+                                              (conj q connection)]))
+                                         [paths visited queue]))]
+      (recur adjacency-list paths' visited' (pop queue')))))
+
 
 
 (defn shortest-paths 
@@ -112,7 +130,8 @@
 (defn shortest-paths-edges ;change this
   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
   [start adjacency-list]
-  (bf-paths-edges adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+  ;(bf-paths-edges adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+  (bf-paths-proto adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
 (defn build-path 
   "Builds the path as a sequence to the 'to' vertex"
