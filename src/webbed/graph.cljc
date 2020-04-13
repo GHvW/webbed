@@ -158,6 +158,25 @@
              (set/union connections visited)
              (apply conj (pop memory) connections)))))
 
+(defn traverse-proto 
+  [adjacency-list path visited memory]
+  (if (empty? memory)
+    path
+    (let [next-vertex (peek memory)
+          [path' visited' memory'] (->> next-vertex
+                                        (adjacency-list)
+                                        (map (fn [edge] (edge :to)))
+                                        (reduce 
+                                         (fn [[p v m] connection]
+                                           (if (contains? v connection)
+                                             [p v m]
+                                             [(conj p {connection next-vertex})
+                                              (conj v connection)
+                                              (conj m connection)]))
+                                         [path visited memory]))]
+      (recur adjacency-list path' visited' (pop memory')))))
+
+
 (defn lazy-traverse [adjacency-list visited memory]
   (lazy-seq
     (when-let [next (peek memory)]
@@ -167,6 +186,23 @@
         (cons next (lazy-traverse adjacency-list
                                  (set/union connections visited)
                                  (apply conj (pop memory) connections)))))))
+(defn lazy-traverse-proto 
+  [adjacency-list visited memory]
+  (lazy-seq
+   (when-let [next-vertex (peek memory)]
+     (let [[visited' memory'] (->> next-vertex
+                                   (adjacency-list)
+                                   (map (fn [edge] (edge :to)))
+                                   (reduce 
+                                    (fn [[p v m] connection]
+                                      (if (contains? v connection)
+                                        [p v m]
+                                        [(conj v connection)
+                                         (conj m connection)]))
+                                    [visited memory]))]
+       (cons next (lazy-traverse adjacency-list
+                                 visited'
+                                 (pop memory')))))))
 
 (defn depth-first-order [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
