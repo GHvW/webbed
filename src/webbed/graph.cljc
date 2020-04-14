@@ -117,8 +117,8 @@
                                              [(conj p {connection vertex}) 
                                               (conj v connection) 
                                               (conj q connection)]))
-                                         [paths visited queue]))]
-      (recur adjacency-list paths' visited' (pop queue')))))
+                                         [paths visited (pop queue)]))]
+      (recur adjacency-list paths' visited' queue'))))
 
 
 
@@ -163,18 +163,17 @@
   (if (empty? memory)
     path
     (let [next-vertex (peek memory)
-          [path' visited' memory'] (->> next-vertex
+          [visited' memory'] (->> next-vertex
                                         (adjacency-list)
                                         (map (fn [edge] (edge :to)))
                                         (reduce 
-                                         (fn [[p v m] connection]
+                                         (fn [[v m] connection]
                                            (if (contains? v connection)
-                                             [p v m]
-                                             [(conj p {connection next-vertex})
-                                              (conj v connection)
+                                             [v m]
+                                             [(conj v connection)
                                               (conj m connection)]))
-                                         [path visited memory]))]
-      (recur adjacency-list path' visited' (pop memory')))))
+                                         [visited (pop memory)]))]
+      (recur adjacency-list (conj path next-vertex) visited' memory'))))
 
 
 (defn lazy-traverse [adjacency-list visited memory]
@@ -186,6 +185,7 @@
         (cons next (lazy-traverse adjacency-list
                                  (set/union connections visited)
                                  (apply conj (pop memory) connections)))))))
+
 (defn lazy-traverse-proto 
   [adjacency-list visited memory]
   (lazy-seq
@@ -194,29 +194,42 @@
                                    (adjacency-list)
                                    (map (fn [edge] (edge :to)))
                                    (reduce 
-                                    (fn [[p v m] connection]
+                                    (fn [[v m] connection]
                                       (if (contains? v connection)
-                                        [p v m]
+                                        [v m]
                                         [(conj v connection)
                                          (conj m connection)]))
-                                    [visited memory]))]
-       (cons next (lazy-traverse adjacency-list
-                                 visited'
-                                 (pop memory')))))))
+                                    [visited (pop memory)]))]
+       (cons next-vertex (lazy-traverse-proto adjacency-list
+                                              visited'
+                                              memory'))))))
+
+
 
 (defn depth-first-order [adjacency-list start]
   (traverse adjacency-list [] #{start} (list start)))
 
+(defn depth-first-order-proto [adjacency-list start]
+  (traverse-proto adjacency-list [] #{start} (list start)))
+
 (defn breadth-first-order [adjacency-list start]
-  traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start))
+  (traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
+
+(defn breadth-first-order-proto [adjacency-list start]
+  (traverse-proto adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
+
 
 (defn df-seq [start adjacency-list]
   (lazy-traverse adjacency-list #{start} (list start)))
 
+(defn df-seq-proto [start adjacency-list]
+  (lazy-traverse-proto adjacency-list #{start} (list start)))
+
 (defn bf-seq [start adjacency-list]
   (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
 
-
+(defn bf-seq-proto [start adjacency-list]
+  (lazy-traverse-proto adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
 
 ; --------------- Testing stuff ----------------
 
@@ -254,6 +267,17 @@
    :d #{{:from :d :to :a :weight 1}
         {:from :d :to :c :weight 3}}
    :e #{{:from :e :to :d :weight 1}}})
+
+(->> (peek (list :s))
+     (dij-test)
+     (map (fn [edge] (edge :to)))
+     (reduce
+      (fn [[v m] conn]
+        (if (contains? v conn)
+          [v m]
+          [(conj v conn)
+           (conj m conn)]))
+      [#{:s} '(:s)]))
 
 (def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
 (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
