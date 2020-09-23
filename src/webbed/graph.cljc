@@ -69,124 +69,124 @@
    {:vertex nil :degree 0}
    adjacency-list))
 
-(defn bf-paths ; going trhough connections 3 times. change it?
-  "Breadth first search helper for shortest-paths"
-  [adjacency-list paths visited queue]
-  (if (empty? queue)
-    paths
-    (let [next-vertex (peek queue)
-          connections (-> queue
-                          (peek)
-                          (adjacency-list)
-                          (set/difference visited))]
-      (recur adjacency-list
-             (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
-             (set/union connections visited)
-             (apply conj (pop queue) connections)))))
+; (defn bf-paths ; going trhough connections 3 times. change it?
+;   "Breadth first search helper for shortest-paths"
+;   [adjacency-list paths visited queue]
+;   (if (empty? queue)
+;     paths
+;     (let [next-vertex (peek queue)
+;           connections (-> queue
+;                           (peek)
+;                           (adjacency-list)
+;                           (set/difference visited))]
+;       (recur adjacency-list
+;              (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
+;              (set/union connections visited)
+;              (apply conj (pop queue) connections)))))
 
-(defn bf-paths-edges ;change this ; goes through connections multiple times, change
-  "Breadth first search helper for shortest-paths" [adjacency-list paths visited queue]
-  (if (empty? queue)
-    paths
-    (let [next-vertex (peek queue)
-          connections (set/difference 
-                       (->> queue
-                            (peek)
-                            (adjacency-list)
-                            (map (fn [edge] (edge :to)))
-                            (set))
-                       visited)]
-      (recur adjacency-list
-             (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
-             (set/union connections visited)
-             (apply conj (pop queue) connections)))))
+; (defn bf-paths-edges ;change this ; goes through connections multiple times, change
+;   "Breadth first search helper for shortest-paths" [adjacency-list paths visited queue]
+;   (if (empty? queue)
+;     paths
+;     (let [next-vertex (peek queue)
+;           connections (set/difference 
+;                        (->> queue
+;                             (peek)
+;                             (adjacency-list)
+;                             (map (fn [edge] (edge :to)))
+;                             (set))
+;                        visited)]
+;       (recur adjacency-list
+;              (->> connections (reduce (fn [acc vertex] (conj acc {vertex next-vertex})) paths))
+;              (set/union connections visited)
+;              (apply conj (pop queue) connections)))))
 
-(defn bf-paths-proto
-  "Breadth first search helper for shortest-paths"
-  [adjacency-list paths visited queue]
-  (if (empty? queue)
-    paths
-    (let [vertex (peek queue)
-          [paths' visited' queue'] (->> vertex
-                                        (adjacency-list)
-                                        (map (fn [edge] (edge :to))) ;abstract the "getting edges?"
-                                        (reduce  ; move the reducer to its own fn?
-                                         (fn [[p v q] connection]
-                                           (if (contains? visited connection)
-                                             [p v q]
-                                             [(conj p {connection vertex}) 
-                                              (conj v connection) 
-                                              (conj q connection)]))
-                                         [paths visited (pop queue)]))]
-      (recur adjacency-list paths' visited' queue'))))
-
-
-
-(defn shortest-paths 
-  "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
-  [start adjacency-list]
-  (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
-
-(defn shortest-paths-edges ;change this
-  "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
-  [start adjacency-list]
-  ;(bf-paths-edges adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
-  (bf-paths-proto adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
-
-(defn build-path 
-  "Builds the path as a sequence to the 'to' vertex"
-  [to paths path]
-  (if (nil? to)
-    path
-    (recur (paths to) paths (cons to path))))
+; (defn bf-paths-proto
+;   "Breadth first search helper for shortest-paths"
+;   [adjacency-list paths visited queue]
+;   (if (empty? queue)
+;     paths
+;     (let [vertex (peek queue)
+;           [paths' visited' queue'] (->> vertex
+;                                         (adjacency-list)
+;                                         (map (fn [edge] (edge :to))) ;abstract the "getting edges?"
+;                                         (reduce  ; move the reducer to its own fn?
+;                                          (fn [[p v q] connection]
+;                                            (if (contains? visited connection)
+;                                              [p v q]
+;                                              [(conj p {connection vertex}) 
+;                                               (conj v connection) 
+;                                               (conj q connection)]))
+;                                          [paths visited (pop queue)]))]
+;       (recur adjacency-list paths' visited' queue'))))
 
 
-(defn degrees-of-separation 
-  "Gets the path to the 'to' vertex"
-  [paths to]
-  (build-path to paths ()))
 
-(defn traverse [adjacency-list path visited memory]
-  (if (empty? memory)
-    path
-    (let [connections (-> memory
-                          (peek)
-                          (adjacency-list)
-                          (set/difference visited))]
-      (recur adjacency-list
-             (conj path (peek memory))
-             (set/union connections visited)
-             (apply conj (pop memory) connections)))))
+; (defn shortest-paths 
+;   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
+;   [start adjacency-list]
+;   (bf-paths adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
 
-(defn traverse-proto 
-  [adjacency-list path visited memory]
-  (if (empty? memory)
-    path
-    (let [next-vertex (peek memory)
-          [visited' memory'] (->> next-vertex
-                                        (adjacency-list)
-                                        (map (fn [edge] (edge :to)))
-                                        (reduce 
-                                         (fn [[v m] connection]
-                                           (if (contains? v connection)
-                                             [v m]
-                                             [(conj v connection)
-                                              (conj m connection)]))
-                                         [visited (pop memory)]))]
-      (recur adjacency-list (conj path next-vertex) visited' memory'))))
+; (defn shortest-paths-edges ;change this
+;   "Uses breadth first search to find the shortest paths to all connected vertices in an unweighted graph"
+;   [start adjacency-list]
+;   ;(bf-paths-edges adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+;   (bf-paths-proto adjacency-list {start nil} #{start} (conj PersistentQueue/EMPTY start)))
+
+; (defn build-path 
+;   "Builds the path as a sequence to the 'to' vertex"
+;   [to paths path]
+;   (if (nil? to)
+;     path
+;     (recur (paths to) paths (cons to path))))
 
 
-(defn lazy-traverse [adjacency-list visited memory]
-  (lazy-seq
-    (when-let [next (peek memory)]
-      (let [connections (-> next
-                            (adjacency-list)
-                            (set/difference visited))]
-        (cons next (lazy-traverse adjacency-list
-                                 (set/union connections visited)
-                                 (apply conj (pop memory) connections)))))))
+; (defn degrees-of-separation 
+;   "Gets the path to the 'to' vertex"
+;   [paths to]
+;   (build-path to paths ()))
 
-(defn lazy-traverse-proto 
+; (defn traverse [adjacency-list path visited memory]
+;   (if (empty? memory)
+;     path
+;     (let [connections (-> memory
+;                           (peek)
+;                           (adjacency-list)
+;                           (set/difference visited))]
+;       (recur adjacency-list
+;              (conj path (peek memory))
+;              (set/union connections visited)
+;              (apply conj (pop memory) connections)))))
+
+; (defn traverse-proto 
+;   [adjacency-list path visited memory]
+;   (if (empty? memory)
+;     path
+;     (let [next-vertex (peek memory)
+;           [visited' memory'] (->> next-vertex
+;                                         (adjacency-list)
+;                                         (map (fn [edge] (edge :to)))
+;                                         (reduce 
+;                                          (fn [[v m] connection]
+;                                            (if (contains? v connection)
+;                                              [v m]
+;                                              [(conj v connection)
+;                                               (conj m connection)]))
+;                                          [visited (pop memory)]))]
+;       (recur adjacency-list (conj path next-vertex) visited' memory'))))
+
+
+; (defn lazy-traverse [adjacency-list visited memory]
+;   (lazy-seq
+;     (when-let [next (peek memory)]
+;       (let [connections (-> next
+;                             (adjacency-list)
+;                             (set/difference visited))]
+;         (cons next (lazy-traverse adjacency-list
+;                                  (set/union connections visited)
+;                                  (apply conj (pop memory) connections)))))))
+
+(defn lazy-traverse 
   [adjacency-list visited memory]
   (lazy-seq
    (when-let [next-vertex (peek memory)]
@@ -206,30 +206,30 @@
 
 
 
-(defn depth-first-order [adjacency-list start]
-  (traverse adjacency-list [] #{start} (list start)))
+; (defn depth-first-order [adjacency-list start]
+;   (traverse adjacency-list [] #{start} (list start)))
 
-(defn depth-first-order-proto [adjacency-list start]
-  (traverse-proto adjacency-list [] #{start} (list start)))
+; (defn depth-first-order-proto [adjacency-list start]
+;   (traverse-proto adjacency-list [] #{start} (list start)))
 
-(defn breadth-first-order [adjacency-list start]
-  (traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
+; (defn breadth-first-order [adjacency-list start]
+;   (traverse adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
 
-(defn breadth-first-order-proto [adjacency-list start]
-  (traverse-proto adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
+; (defn breadth-first-order-proto [adjacency-list start]
+;   (traverse-proto adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
 
+
+; (defn df-seq [start adjacency-list]
+;   (lazy-traverse adjacency-list #{start} (list start)))
 
 (defn df-seq [start adjacency-list]
   (lazy-traverse adjacency-list #{start} (list start)))
 
-(defn df-seq-proto [start adjacency-list]
-  (lazy-traverse-proto adjacency-list #{start} (list start)))
+; (defn bf-seq [start adjacency-list]
+;   (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
 
 (defn bf-seq [start adjacency-list]
   (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
-
-(defn bf-seq-proto [start adjacency-list]
-  (lazy-traverse-proto adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
 
 ; --------------- Testing stuff ----------------
 
