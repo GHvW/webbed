@@ -187,7 +187,7 @@
 ;                                  (apply conj (pop memory) connections)))))))
 
 (defn lazy-traverse 
-  [adjacency-list visited memory]
+  [visited memory adjacency-list]
   (lazy-seq
    (when-let [next-vertex (peek memory)]
      (let [[visited' memory'] (->> next-vertex
@@ -200,9 +200,9 @@
                                         [(conj v connection)
                                          (conj m connection)]))
                                     [visited (pop memory)]))]
-       (cons next-vertex (lazy-traverse-proto adjacency-list
-                                              visited'
-                                              memory'))))))
+       (cons next-vertex (lazy-traverse-proto visited'
+                                              memory' 
+                                              adjacency-list))))))
 
 
 
@@ -219,75 +219,72 @@
 ;   (traverse-proto adjacency-list [] #{start} (conj PersistentQueue/EMPTY start)))
 
 
-; (defn df-seq [start adjacency-list]
-;   (lazy-traverse adjacency-list #{start} (list start)))
 
 (defn df-seq [start adjacency-list]
-  (lazy-traverse adjacency-list #{start} (list start)))
+  (lazy-traverse #{start} (list start) adjacency-list))
 
-; (defn bf-seq [start adjacency-list]
-;   (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
 
 (defn bf-seq [start adjacency-list]
-  (lazy-traverse adjacency-list #{start} (conj PersistentQueue/EMPTY start)))
+  (lazy-traverse #{start} (conj PersistentQueue/EMPTY start) adjacency-list))
 
 ; --------------- Testing stuff ----------------
 
-(def graph
-  {:vertices #{:a :b :c :d}
-   :edges #{{:from :a :to :c}
-            {:from :d :to :c}
-            {:from :c :to :b}}})
+(comment
+  (def graph
+    {:vertices #{:a :b :c :d}
+     :edges #{{:from :a :to :c}
+              {:from :d :to :c}
+              {:from :c :to :b}}})
 
-(def adjlist
-  {:a #{:b :c :d}
-   :b #{:a :e}
-   :c #{:a :d}
-   :d #{:a :c}
-   :e #{:b}})
+  (def adjlist
+    {:a #{:b :c :d}
+     :b #{:a :e}
+     :c #{:a :d}
+     :d #{:a :c}
+     :e #{:b}})
 
-(def adjlist2
-  {:1 #{:3 :4}
-   :2 #{}
-   :3 #{:1 :5 :7}
-   :4 #{:1 :8}
-   :5 #{:3 :8 :6}
-   :6 #{:5}
-   :7 #{:3}
-   :8 #{:5 :4}})
+  (def adjlist2
+    {:1 #{:3 :4}
+     :2 #{}
+     :3 #{:1 :5 :7}
+     :4 #{:1 :8}
+     :5 #{:3 :8 :6}
+     :6 #{:5}
+     :7 #{:3}
+     :8 #{:5 :4}})
 
-(def dij-test
-  {:s #{{:from :s :to :e :weight 2}
-        {:from :s :to :a :weight 4}}
-   :a #{{:from :a :to :d :weight 3}
-        {:from :a :to :b :weight 5}
-        {:from :a :to :c :weight 6}}
-   :b #{{:from :b :to :a :weight 5}}
-   :c #{{:from :c :to :b :weight 1}}
-   :d #{{:from :d :to :a :weight 1}
-        {:from :d :to :c :weight 3}}
-   :e #{{:from :e :to :d :weight 1}}})
+  (def dij-test
+    {:s #{{:from :s :to :e :weight 2}
+          {:from :s :to :a :weight 4}}
+     :a #{{:from :a :to :d :weight 3}
+          {:from :a :to :b :weight 5}
+          {:from :a :to :c :weight 6}}
+     :b #{{:from :b :to :a :weight 5}}
+     :c #{{:from :c :to :b :weight 1}}
+     :d #{{:from :d :to :a :weight 1}
+          {:from :d :to :c :weight 3}}
+     :e #{{:from :e :to :d :weight 1}}})
 
-(->> (peek (list :s))
-     (dij-test)
-     (map (fn [edge] (edge :to)))
-     (reduce
-      (fn [[v m] conn]
-        (if (contains? v conn)
-          [v m]
-          [(conj v conn)
-           (conj m conn)]))
-      [#{:s} '(:s)]))
+  (->> (peek (list :s))
+       (dij-est)
+       (map (fn [edge] (edge :to)))
+        (reduce
+          (fn [[v m] conn]
+            (if (contains? v conn)
+              [v m]
+              [(conj v conn)
+              (conj m conn)]))
+          [#{:s} '(:s)]))
 
-(def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
-(def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
-(def test2 (update-edges adjlist :e :c))
+  (def testmake (undirected-graph->adj-list (graph :vertices) (graph :edges)))
+  (def testmake2 (directed-graph->adj-list (graph :vertices) (graph :edges)))
+  (def test2 (update-edges adjlist :e :c))
 
-(average-degree adjlist2)
+  (average-degree adjlist2)
 
 
-(def maxdeg (max-degree adjlist2))
-(def maxwkey (max-degree-with-key adjlist2))
-(defn adder [x y] (+ x y))
+  (def maxdeg (max-degree adjlist2))
+  (def maxwkey (max-degree-with-key adjlist2))
+  (defn adder [x y] (+ x y))
 
-(adder 10 20)
+  (adder 10 20))
