@@ -1,0 +1,13 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ [[org.clojure/core.match "1.0.0"]]
+
+ :builds
+ {:webbed {:target :node-script
+           :output-to "dist/index.js"
+           :main webbed.core/foo}}}

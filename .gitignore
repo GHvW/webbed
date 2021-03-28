@@ -14,3 +14,18 @@ pom.xml.asc
 
 *.idea
 *.iml
+
+.vs
+.vscode
+.idea
+.metals
+.ionide
+
+.clj-kondo
+.shadow-cljs
+.lsp
+.calva
+
+dist
+
+node_modules
