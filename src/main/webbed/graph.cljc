@@ -119,17 +119,20 @@
         :c #{:a :d}
         :d #{:a :c}
         :e #{:b}}
-       (bf-seq :a))
+       (bf-seq :a)
+       (take 4))
 
-  (def adjlist2
-    {:1 #{:3 :4}
-     :2 #{}
-     :3 #{:1 :5 :7}
-     :4 #{:1 :8}
-     :5 #{:3 :8 :6}
-     :6 #{:5}
-     :7 #{:3}
-     :8 #{:5 :4}})
+  (->> {:s #{{:from :s :to :e :weight 2}
+             {:from :s :to :a :weight 4}}
+        :a #{{:from :a :to :d :weight 3}
+             {:from :a :to :b :weight 5}
+             {:from :a :to :c :weight 6}}
+        :b #{{:from :b :to :a :weight 5}}
+        :c #{{:from :c :to :b :weight 1}}
+        :d #{{:from :d :to :a :weight 1}
+             {:from :d :to :c :weight 3}}
+        :e #{{:from :e :to :d :weight 1}}}
+       (bf-seq :a))
 
   (def dij-test
     {:s #{{:from :s :to :e :weight 2}
@@ -143,28 +146,7 @@
           {:from :d :to :c :weight 3}}
      :e #{{:from :e :to :d :weight 1}}})
 
-  (->> (peek (list :s))
-       (dij-test)
-       (map (fn [edge] (edge :to)))
-       (reduce
-        (fn [[v m] conn]
-          (if (contains? v conn)
-            [v m]
-            [(conj v conn)
-             (conj m conn)]))
-        [#{:s} '(:s)]))
 
-  (undirected-graph->adj-list ({:vertices #{:a :b :c :d}
-                              :edges #{{:from :a :to :c}
-                                       {:from :d :to :c}
-                                       {:from :c :to :b}}} :vertices) ({:vertices #{:a :b :c :d}
-                              :edges #{{:from :a :to :c}
-                                       {:from :d :to :c}
-                                       {:from :c :to :b}}} :edges))
-  (directed-graph->adj-list ({:vertices #{:a :b :c :d}
-                              :edges #{{:from :a :to :c}
-                                       {:from :d :to :c}
-                                       {:from :c :to :b}}} :vertices) (graph :edges))
   (update-edges :e :c {:a #{:b :c :d}
                        :b #{:a :e}
                        :c #{:a :d}
@@ -172,23 +154,23 @@
                        :e #{:b}})
 
   (average-degree {:1 #{:3 :4}
-     :2 #{}
-     :3 #{:1 :5 :7}
-     :4 #{:1 :8}
-     :5 #{:3 :8 :6}
-     :6 #{:5}
-     :7 #{:3}
-     :8 #{:5 :4}})
+                   :2 #{}
+                   :3 #{:1 :5 :7}
+                   :4 #{:1 :8}
+                   :5 #{:3 :8 :6}
+                   :6 #{:5}
+                   :7 #{:3}
+                   :8 #{:5 :4}})
 
 
   (max-degree {:1 #{:3 :4}
-     :2 #{}
-     :3 #{:1 :5 :7}
-     :4 #{:1 :8}
-     :5 #{:3 :8 :6}
-     :6 #{:5}
-     :7 #{:3}
-     :8 #{:5 :4}})
+               :2 #{}
+               :3 #{:1 :5 :7}
+               :4 #{:1 :8}
+               :5 #{:3 :8 :6}
+               :6 #{:5}
+               :7 #{:3}
+               :8 #{:5 :4}})
 
   (max-degree-with-key {:1 #{:3 :4}
                         :2 #{}
