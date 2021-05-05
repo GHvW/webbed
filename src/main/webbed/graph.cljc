@@ -9,6 +9,16 @@
   [from to adjacency-list]
   (update adjacency-list from conj to))
 
+;; maybe new add edge
+;; (defn add-edge
+;;   [adjacency-list from to]
+;;   (update adjacency-list from conj to))
+
+;; maybe new add vertex
+;; (defn add-vertex
+;;   [adjacency-list vertex] 
+;;   (assoc adjacency-list vertex #{}))
+
 
 (defn undirected-graph->adj-list 
   "Takes a set of vertices and a set of edges and constructs an adjacency list from them"
@@ -77,12 +87,31 @@
    adjacency-list))
 
 
+;; (defn lazy-traverse 
+;;   [visited memory adjacency-list]
+;;   (lazy-seq
+;;    (when-let [next-vertex (peek memory)]
+;;      (let [[visited' memory'] (->> next-vertex
+;;                                    (adjacency-list)
+;;                                    (map (fn [edge] (edge :to)))
+;;                                    (reduce 
+;;                                     (fn [[v m] connection]
+;;                                       (if (contains? v connection)
+;;                                         [v m]
+;;                                         [(conj v connection)
+;;                                          (conj m connection)]))
+;;                                     [visited (pop memory)]))]
+;;        (cons next-vertex (lazy-traverse visited'
+;;                                         memory'
+;;                                         adjacency-list))))))
+
+
 (defn lazy-traverse 
   [visited memory adjacency-list]
   (lazy-seq
-   (when-let [next-vertex (peek memory)]
-     (let [[visited' memory'] (->> next-vertex
-                                   (adjacency-list)
+   (when-let [next-edge (peek memory)]
+     (let [[visited' memory'] (->> (next-edge :to)
+                                   (adjacency-list) ;; this still needs work
                                    (map (fn [edge] (edge :to)))
                                    (reduce 
                                     (fn [[v m] connection]
@@ -91,18 +120,22 @@
                                         [(conj v connection)
                                          (conj m connection)]))
                                     [visited (pop memory)]))]
-       (cons next-vertex (lazy-traverse visited'
+       (cons next-edge (lazy-traverse visited'
                                         memory'
                                         adjacency-list))))))
 
 
-(defn df-seq [start adjacency-list]
-  (lazy-traverse #{start} (list start) adjacency-list))
+;; (defn df-seq [start adjacency-list]
+;;   (lazy-traverse #{start} (list start) adjacency-list))
 
+(defn df-seq [start adjacency-list]
+  (lazy-traverse (conj ;; need to get the vertices into a set (adjacency-list start) start) (apply conj '() (adjacency-list start)) adjacency-list))
+
+;; (defn bf-seq [start adjacency-list]
+;;   (lazy-traverse #{start} (conj PersistentQueue/EMPTY start) adjacency-list))
 
 (defn bf-seq [start adjacency-list]
   (lazy-traverse #{start} (conj PersistentQueue/EMPTY start) adjacency-list))
-
 ; --------------- Testing stuff ----------------
 
 (comment
