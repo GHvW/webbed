@@ -24,6 +24,7 @@
     vertices)
    edges))
 
+
 (defn directed-graph->adj-list [vertices edges]
   (reduce
     (fn [adj edge]
@@ -36,10 +37,12 @@
       vertices)
    edges))
 
+
 (defn degree 
   "The number of connections to the vertex"
   [adjacency-list vertex]
   (count (adjacency-list vertex)))
+
 
 (defn average-degree 
   "Find the average degree of the nodes in the graph"
@@ -47,6 +50,7 @@
   (as-> adjacency-list x
     (reduce-kv (fn [total k v] (+ total (count v))) 0 x)
     (/ x (count adjacency-list))))
+
 
 (defn max-degree 
   "Find max connections of all nodes"
@@ -58,6 +62,7 @@
        max))
    0
    adjacency-list))
+
 
 (defn max-degree-with-key 
   "Find the vertex with the most connections of all nodes"
@@ -119,6 +124,7 @@
         :c #{:a :d}
         :d #{:a :c}
         :e #{:b}}
+        ; needs to convert each connection to a full edge
        (bf-seq :a)
        (take 4))
 
@@ -133,6 +139,35 @@
              {:from :d :to :c :weight 3}}
         :e #{{:from :e :to :d :weight 1}}}
        (bf-seq :a))
+
+  
+  (->> {:s #{{:from :s :to :e :weight 2}
+             {:from :s :to :a :weight 4}}
+        :a #{{:from :a :to :d :weight 3}
+             {:from :a :to :b :weight 5}
+             {:from :a :to :c :weight 6}}
+        :b #{{:from :b :to :a :weight 5}}
+        :c #{{:from :c :to :b :weight 1}}
+        :d #{{:from :d :to :a :weight 1}
+             {:from :d :to :c :weight 3}}
+        :e #{{:from :e :to :d :weight 1}}}
+       (bf-seq :s))
+
+
+  (->> {:s #{{:from :s :to :e :weight 2}
+             {:from :s :to :a :weight 4}}
+        :a #{{:from :a :to :d :weight 3}
+             {:from :a :to :b :weight 5}
+             {:from :a :to :c :weight 6}}
+        :b #{{:from :b :to :a :weight 5}}
+        :c #{{:from :c :to :b :weight 1}
+             {:from :c :to :f :weight 3}}
+        :d #{{:from :d :to :a :weight 1}
+             {:from :d :to :c :weight 3}}
+        :e #{{:from :e :to :d :weight 1}}
+        :f #{{:from :f :to :d :weight 2}}}
+       (df-seq :s))
+
 
   (def dij-test
     {:s #{{:from :s :to :e :weight 2}
