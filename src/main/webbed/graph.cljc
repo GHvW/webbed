@@ -112,30 +112,31 @@
    (when-let [next-edge (peek memory)]
      (let [[visited' memory'] (->> (next-edge :to)
                                    (adjacency-list) ;; this still needs work
-                                   (map (fn [edge] (edge :to)))
+                                  ;;  (map (fn [edge] (edge :to)))
                                    (reduce 
-                                    (fn [[v m] connection]
-                                      (if (contains? v connection)
-                                        [v m]
-                                        [(conj v connection)
-                                         (conj m connection)]))
+                                    (fn [[v m] edge]
+                                      (let [to (edge :to)]
+                                        (if (contains? v to)
+                                          [v m]
+                                          [(conj v to)
+                                           (conj m edge)])))
                                     [visited (pop memory)]))]
        (cons next-edge (lazy-traverse visited'
-                                        memory'
-                                        adjacency-list))))))
+                                      memory'
+                                      adjacency-list))))))
 
 
 ;; (defn df-seq [start adjacency-list]
 ;;   (lazy-traverse #{start} (list start) adjacency-list))
 
 (defn df-seq [start adjacency-list]
-  (lazy-traverse (conj ;; need to get the vertices into a set (adjacency-list start) start) (apply conj '() (adjacency-list start)) adjacency-list))
+  (lazy-traverse #{start} (list {:from start :to start}) adjacency-list)) ;; need to get the vertices into a set (adjacency-list start) start) (apply conj '() (adjacency-list start)) adjacency-list))
 
 ;; (defn bf-seq [start adjacency-list]
 ;;   (lazy-traverse #{start} (conj PersistentQueue/EMPTY start) adjacency-list))
 
 (defn bf-seq [start adjacency-list]
-  (lazy-traverse #{start} (conj PersistentQueue/EMPTY start) adjacency-list))
+  (lazy-traverse #{start} (conj PersistentQueue/EMPTY {:from start :to start}) adjacency-list))
 ; --------------- Testing stuff ----------------
 
 (comment
