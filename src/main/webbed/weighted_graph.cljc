@@ -44,11 +44,6 @@
 
 (defn relax [[edge-to dist-to pq] edge]
   (let [{:keys [from to weight]} edge]
-    ;(println dist-to)
-    ;(println edge-to)
-    ;(println (str "from " from))
-    ;(println (str "to " to))
-    ;(println (str "weight " weight))
     (if (or
           (nil? (dist-to to))
           (> (dist-to to) (+ (dist-to from) weight)))
