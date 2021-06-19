@@ -5,7 +5,8 @@
   "src/test"]
 
  :dependencies
- [[org.clojure/core.match "1.0.0"]]
+ [[org.clojure/core.match "1.0.0"]
+  [org.clojure/data.priority-map "1.0.0"]]
 
  :builds
  {:webbed {:target :node-script

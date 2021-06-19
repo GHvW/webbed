@@ -42,38 +42,65 @@
          (into (hash-map)))
     edges))
 
-(defn relax [[edge-to dist-to pq] edge]
-  (let [{:keys [from to weight]} edge]
+;; (defn relax [[edge-to dist-to pq] edge]
+;;   (let [{:keys [from to weight]} edge]
+;;     (if (or
+;;           (nil? (dist-to to))
+;;           (> (dist-to to) (+ (dist-to from) weight)))
+;;       (let [dist-to' (assoc dist-to to (+ (dist-to from) weight))
+;;             edge-to' (assoc edge-to to edge)]
+;;         [edge-to' dist-to' (assoc pq to (dist-to' to))])
+;;       [edge-to dist-to pq])))
+
+;; STILL NEEDS TO BE TESTED
+(defn relax-reducer
+  [[distances priority-queue] edge]
+  (let [{:keys [from to weight]} edge
+        current-distance-plus-weight (+ (distances from) weight)]
     (if (or
-          (nil? (dist-to to))
-          (> (dist-to to) (+ (dist-to from) weight)))
-      (let [dist-to' (assoc dist-to to (+ (dist-to from) weight))
-            edge-to' (assoc edge-to to edge)]
-        [edge-to' dist-to' (assoc pq to (dist-to' to))])
-      [edge-to dist-to pq])))
+         (nil? (distances to))
+         (> (distances to) current-distance-plus-weight))
+      [(assoc distances to current-distance-plus-weight)
+       (assoc priority-queue to (distances to))]
+      [distances priority-queue])))
 
-(defn dijkstra [edge-to dist-to pq adj-list]
-  (if-let [[next-vertex _] (peek pq)]
-    (let [[e d p] (reduce
-                    relax
-                    [edge-to dist-to (pop pq)]
-                    (adj-list next-vertex))]
-      (recur e d p adj-list))
-    {:edge-to edge-to :dist-to dist-to}))
+;; (defn dijkstra [edge-to dist-to pq adj-list]
+;;   (if-let [[next-vertex _] (peek pq)]
+;;     (let [[e d p] (reduce
+;;                     relax
+;;                     [edge-to dist-to (pop pq)]
+;;                     (adj-list next-vertex))]
+;;       (recur e d p adj-list))
+;;     {:edge-to edge-to :dist-to dist-to}))
 
-(defn directed-shortest-path [adj-list start]
-  (dijkstra {start nil} {start 0} (priority-map start 0) adj-list))
 
-(defn build-shortest-path [to paths path]
-  (if-let [next-edge (paths to)]
-    (recur (next-edge :from) paths (cons to path))
-    path))
+;; STILL NEEDS TO BE TESTED
+(defn dijkstra [distances priority-queue adj-list]
+  (lazy-seq
+   (when-let [[next-vertex _] (peek priority-queue)]
+     (let [[dists pq] (reduce
+                       relax-reducer
+                       [distances (pop priority-queue)]
+                       (adj-list next-vertex))]
+       (cons dists pq adj-list)))))
+
+
+;; STILL NEEDS TO BE TESTED
+(defn directed-shortest-path [start adj-list]
+  (dijkstra {start 0} (priority-map start 0) adj-list))
+
+
+;; (defn build-shortest-path [to paths path]
+;;   (if-let [next-edge (paths to)]
+;;     (recur (next-edge :from) paths (cons to path))
+;;     path))
 
 
 
 
 ; -------------------- TESTING --------------------
 
+(comment
 (def weighted-graph
   {:vertices #{:a :b :c :d :h :i :j}
    :edges #{{:from :a
@@ -114,7 +141,4 @@
    :c #{{:from :c :to :b :weight 1}}
    :d #{{:from :d :to :a :weight 1}
         {:from :d :to :c :weight 3}}
-   :e #{{:from :e :to :d :weight 1}}})
-
-
-(def dshort (build-shortest-path :b ((directed-shortest-path dij-test :s) :edge-to) ()))
+   :e #{{:from :e :to :d :weight 1}}}))

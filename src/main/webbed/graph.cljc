@@ -87,32 +87,12 @@
    adjacency-list))
 
 
-;; (defn lazy-traverse 
-;;   [visited memory adjacency-list]
-;;   (lazy-seq
-;;    (when-let [next-vertex (peek memory)]
-;;      (let [[visited' memory'] (->> next-vertex
-;;                                    (adjacency-list)
-;;                                    (map (fn [edge] (edge :to)))
-;;                                    (reduce 
-;;                                     (fn [[v m] connection]
-;;                                       (if (contains? v connection)
-;;                                         [v m]
-;;                                         [(conj v connection)
-;;                                          (conj m connection)]))
-;;                                     [visited (pop memory)]))]
-;;        (cons next-vertex (lazy-traverse visited'
-;;                                         memory'
-;;                                         adjacency-list))))))
-
-
 (defn lazy-traverse 
   [visited memory adjacency-list]
   (lazy-seq
    (when-let [next-edge (peek memory)]
      (let [[visited' memory'] (->> (next-edge :to)
-                                   (adjacency-list) ;; this still needs work
-                                  ;;  (map (fn [edge] (edge :to)))
+                                   (adjacency-list)
                                    (reduce 
                                     (fn [[v m] edge]
                                       (let [to (edge :to)]
