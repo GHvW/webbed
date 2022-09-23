@@ -1,5 +1,5 @@
-(ns webbed.core-test
-  (:require [clojure.test :refer :all]
+(ns webbed.core-spec
+  (:require [cljs.test :refer :all]
             [webbed.core :refer :all]))
 
 (deftest a-test

@@ -42,15 +42,6 @@
         (into (hash-map)))
    edges))
 
-;; (defn relax [[edge-to dist-to pq] edge]
-;;   (let [{:keys [from to weight]} edge]
-;;     (if (or
-;;           (nil? (dist-to to))
-;;           (> (dist-to to) (+ (dist-to from) weight)))
-;;       (let [dist-to' (assoc dist-to to (+ (dist-to from) weight))
-;;             edge-to' (assoc edge-to to edge)]
-;;         [edge-to' dist-to' (assoc pq to (dist-to' to))])
-;;       [edge-to dist-to pq])))
 
 ;; STILL NEEDS TO BE TESTED
 (defn relax
@@ -63,15 +54,6 @@
       [(assoc distances to current-distance-plus-weight)
        (assoc priority-queue to (distances to))]
       [distances priority-queue])))
-
-;; (defn dijkstra [edge-to dist-to pq adj-list]
-;;   (if-let [[next-vertex _] (peek pq)]
-;;     (let [[e d p] (reduce
-;;                     relax
-;;                     [edge-to dist-to (pop pq)]
-;;                     (adj-list next-vertex))]
-;;       (recur e d p adj-list))
-;;     {:edge-to edge-to :dist-to dist-to}))
 
 
 ;; STILL NEEDS TO BE TESTED
@@ -90,12 +72,6 @@
 ;; STILL NEEDS TO BE TESTED
 (defn directed-shortest-path [start adj-list]
   (dijkstra {start 0} (priority-map start 0) adj-list))
-
-
-;; (defn build-shortest-path [to paths path]
-;;   (if-let [next-edge (paths to)]
-;;     (recur (next-edge :from) paths (cons to path))
-;;     path))
 
 
 

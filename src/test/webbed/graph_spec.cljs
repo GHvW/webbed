@@ -1,2 +1,2 @@
-(ns webbed.graph-test
+(ns webbed.graph-spec
   (:require [cljs.test :refer [deftest is]]))

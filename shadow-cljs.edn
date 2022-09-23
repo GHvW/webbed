@@ -11,4 +11,8 @@
  :builds
  {:webbed {:target :node-script
            :output-to "dist/index.js"
-           :main webbed.core/foo}}}
+           :main webbed.core/foo}
+  :test {:target :node-test
+         :output-to "out/unit-tests.js"
+         :ns-regexp "-spec$"
+         :auto-run true}}}
