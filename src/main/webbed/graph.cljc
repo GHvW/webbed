@@ -108,6 +108,40 @@
   (lazy-walk #{start}
              (conj PersistentQueue/EMPTY {:from start :to start})
              adjacency-list))
+
+
+(defn- update-paths
+  [paths {:keys [from to]}]
+  (assoc paths to from))
+
+;; TODO - combine these and then partial apply the xx-seq func?
+;; (vertex adjacency-map) -> seq[map[vertex, vertex]]
+(defn depth-first-paths
+  [start graph]
+  (->> graph
+       (df-seq start)
+       (reductions update-paths {})))
+
+
+;; (vertex adjacency-map) -> seq[map[vertex, vertex]]
+(defn breadth-first-paths
+  [start graph]
+  (->> graph
+       (bf-seq start)
+       (reductions update-paths {})))
+
+
+;; (vertex, vertex-map) -> seq[vertex]
+(defn path
+  [from paths]
+  (let [find (fn [results from_ paths]
+               (let [next (paths from_)]
+                 (if (nil? next)
+                   results
+                   (recur (conj results from_) next paths))))]
+    (find [] from paths)))
+
+
 ; --------------- Testing stuff ----------------
 
 (comment
@@ -117,21 +151,11 @@
               {:from :d :to :c}
               {:from :c :to :b}}})
 
-  (def adjlist
-    {:a #{:b :c :d}
-     :b #{:a :e}
-     :c #{:a :d}
-     :d #{:a :c}
-     :e #{:b}})
-
-  (->> {:a #{:b :c :d}
-        :b #{:a :e}
-        :c #{:a :d}
-        :d #{:a :c}
-        :e #{:b}}
-        ; needs to convert each connection to a full edge
-       (bf-seq :a)
-       (take 4))
+  ;; result not really deterministic since uses a set
+  ;; should start with a, go to b c or d, 
+  ;; from :b -> done
+  ;; from :c -> :b (if not :b first) -> done
+  ;; from :d -> :c (if not :c first) -> :b (if not :b first) -> done
 
   (->> {:s #{{:from :s :to :e :weight 2}
              {:from :s :to :a :weight 4}}
@@ -146,6 +170,7 @@
        (bf-seq :a))
 
 
+
   (->> {:s #{{:from :s :to :e :weight 2}
              {:from :s :to :a :weight 4}}
         :a #{{:from :a :to :d :weight 3}
@@ -158,7 +183,13 @@
         :e #{{:from :e :to :d :weight 1}}}
        (bf-seq :s))
 
-
+  ;; should start with :s, go to :a or :e,
+  ;; from :a ->
+    ;; from :b -> done
+    ;; from :c -> :b (if not :b first) -> done
+    ;; from :d -> :c (if not :c first) -> :b (if not :b first) -> done
+  ;; from :e ->
+    ;; :d -> :c -> :b -> done
   (->> {:s #{{:from :s :to :e :weight 2}
              {:from :s :to :a :weight 4}}
         :a #{{:from :a :to :d :weight 3}
@@ -173,6 +204,32 @@
         :f #{{:from :f :to :d :weight 2}}}
        (df-seq :s))
 
+
+  (->> {:s #{{:from :s :to :e :weight 2}
+             {:from :s :to :a :weight 4}}
+        :a #{{:from :a :to :d :weight 3}
+             {:from :a :to :b :weight 5}
+             {:from :a :to :c :weight 6}}
+        :b #{{:from :b :to :a :weight 5}}
+        :c #{{:from :c :to :b :weight 1}
+             {:from :c :to :f :weight 3}}
+        :d #{{:from :d :to :a :weight 1}
+             {:from :d :to :c :weight 3}}
+        :e #{{:from :e :to :d :weight 1}}
+        :f #{{:from :f :to :d :weight 2}}}
+       (depth-first-paths :s))
+
+  (->> {:s #{{:from :s :to :e :weight 2}
+             {:from :s :to :a :weight 4}}
+        :a #{{:from :a :to :d :weight 3}
+             {:from :a :to :b :weight 5}
+             {:from :a :to :c :weight 6}}
+        :b #{{:from :b :to :a :weight 5}}
+        :c #{{:from :c :to :b :weight 1}}
+        :d #{{:from :d :to :a :weight 1}
+             {:from :d :to :c :weight 3}}
+        :e #{{:from :e :to :d :weight 1}}}
+       (breadth-first-paths :s))
 
   (def dij-test
     {:s #{{:from :s :to :e :weight 2}
